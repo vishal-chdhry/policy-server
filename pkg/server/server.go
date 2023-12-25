@@ -5,6 +5,7 @@ import (
 	"net/http"
 	"time"
 
+	"github.com/kyverno/policy-server/pkg/storage"
 	"github.com/kyverno/policy-server/pkg/utils"
 	"k8s.io/component-base/metrics"
 
@@ -36,17 +37,17 @@ func RegisterServerMetrics(registrationFunc func(metrics.Registerable) error, re
 
 func NewServer(
 	apiserver *genericapiserver.GenericAPIServer,
-	// storage storage.Storage,
+	storage storage.Storage,
 ) *server {
 	return &server{
 		GenericAPIServer: apiserver,
-		// storage:          storage,
+		storage:          storage,
 	}
 }
 
 type server struct {
 	*genericapiserver.GenericAPIServer
-	// storage    storage.Storage
+	storage storage.Storage
 }
 
 // RunUntil starts background scraping goroutine and runs apiserver serving metrics.

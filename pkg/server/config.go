@@ -4,6 +4,7 @@ import (
 	"net/http"
 	"time"
 
+	"github.com/kyverno/policy-server/pkg/storage"
 	apimetrics "k8s.io/apiserver/pkg/endpoints/metrics"
 	genericapiserver "k8s.io/apiserver/pkg/server"
 	"k8s.io/client-go/rest"
@@ -20,25 +21,25 @@ type Config struct {
 
 func (c Config) Complete() (*server, error) {
 	// Disable default metrics handler and create custom one
-	c.Apiserver.EnableMetrics = false
+	c.Apiserver.EnableMetrics = true
 	metricsHandler, err := c.metricsHandler()
 	if err != nil {
 		return nil, err
 	}
-	genericServer, err := c.Apiserver.Complete(nil).New("metrics-server", genericapiserver.NewEmptyDelegate())
+	genericServer, err := c.Apiserver.Complete(nil).New("policy-server", genericapiserver.NewEmptyDelegate())
 	if err != nil {
 		return nil, err
 	}
 	genericServer.Handler.NonGoRestfulMux.HandleFunc("/metrics", metricsHandler)
 
-	// store := storage.NewStorage(c.MetricResolution)
+	store := storage.NewStorage()
 	// if err := api.Install(store, podInformer.Lister(), nodes.Lister(), genericServer, labelRequirement); err != nil {
 	// 	return nil, err
 	// }
 
 	s := NewServer(
 		genericServer,
-		// store,
+		store,
 	)
 	err = s.RegisterProbes()
 	if err != nil {
@@ -48,7 +49,7 @@ func (c Config) Complete() (*server, error) {
 }
 
 func (c Config) metricsHandler() (http.HandlerFunc, error) {
-	// Create registry for Metrics Server metrics
+	// Create registry for Policy Server metrics
 	registry := metrics.NewKubeRegistry()
 	err := RegisterMetrics(registry, c.MetricResolution)
 	if err != nil {
