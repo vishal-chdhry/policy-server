@@ -4,6 +4,7 @@ import (
 	"net/http"
 	"time"
 
+	"github.com/kyverno/policy-server/pkg/api"
 	"github.com/kyverno/policy-server/pkg/storage"
 	apimetrics "k8s.io/apiserver/pkg/endpoints/metrics"
 	genericapiserver "k8s.io/apiserver/pkg/server"
@@ -33,9 +34,9 @@ func (c Config) Complete() (*server, error) {
 	genericServer.Handler.NonGoRestfulMux.HandleFunc("/metrics", metricsHandler)
 
 	store := storage.NewStorage()
-	// if err := api.Install(store, podInformer.Lister(), nodes.Lister(), genericServer, labelRequirement); err != nil {
-	// 	return nil, err
-	// }
+	if err := api.Install(store); err != nil {
+		return nil, err
+	}
 
 	s := NewServer(
 		genericServer,

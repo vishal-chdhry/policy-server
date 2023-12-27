@@ -15,6 +15,7 @@
 package api
 
 import (
+	"github.com/kyverno/policy-server/pkg/storage"
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 	"k8s.io/apimachinery/pkg/runtime"
 	"k8s.io/apimachinery/pkg/runtime/schema"
@@ -51,7 +52,7 @@ func Build(pod, node rest.Storage) genericapiserver.APIGroupInfo {
 }
 
 // Install builds the metrics for the metrics.k8s.io API, and then installs it into the given API metrics-server.
-func Install() error {
+func Install(store storage.Storage) error {
 	// node := newNodeMetrics(metrics.Resource("nodemetrics"), m, nodeLister, nodeSelector)
 	// pod := newPodMetrics(metrics.Resource("podmetrics"), m, podMetadataLister)
 	// info := Build(pod, node)
