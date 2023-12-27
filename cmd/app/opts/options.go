@@ -7,6 +7,7 @@ import (
 	"time"
 
 	"github.com/kyverno/policy-server/pkg/api"
+	generatedopenapi "github.com/kyverno/policy-server/pkg/api/generated/openapi"
 	"github.com/kyverno/policy-server/pkg/server"
 	openapinamer "k8s.io/apiserver/pkg/endpoints/openapi"
 	genericapiserver "k8s.io/apiserver/pkg/server"
@@ -18,8 +19,6 @@ import (
 	"k8s.io/component-base/logs"
 	logsapi "k8s.io/component-base/logs/api/v1"
 	_ "k8s.io/component-base/logs/json/register"
-	// generatedopenapi "sigs.k8s.io/metrics-server/pkg/api/generated/openapi"
-	// "sigs.k8s.io/metrics-server/pkg/server"
 )
 
 type Options struct {
