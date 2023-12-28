@@ -6,7 +6,7 @@ import (
 
 type API interface {
 	rest.Storage
-	// rest.StandardStorage // Get, List, Create, Update, Delete, DeleteCollection, Watch
+	// rest.StandardStorage // Get, List, Create, Update, Delete, DeleteCollection, Watch, ConvertToTable
 	rest.KindProvider
 	rest.Scoper
 	rest.SingularNameProvider

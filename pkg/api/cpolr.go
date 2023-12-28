@@ -7,6 +7,7 @@ import (
 	"github.com/kyverno/policy-server/pkg/storage"
 	"k8s.io/apiextensions-apiserver/pkg/apiserver/validation"
 	metainternalversion "k8s.io/apimachinery/pkg/apis/meta/internalversion"
+	metav1beta1 "k8s.io/apimachinery/pkg/apis/meta/v1beta1"
 	"k8s.io/apimachinery/pkg/runtime"
 	"k8s.io/apimachinery/pkg/watch"
 	"sigs.k8s.io/wg-policy-prototypes/policy-report/pkg/api/wgpolicyk8s.io/v1beta1"
@@ -57,6 +58,25 @@ func (c *clusterpolicyreportsgetter) NewList() runtime.Object {
 
 func (c *clusterpolicyreportsgetter) Watch(ctx context.Context, _ *metainternalversion.ListOptions) (watch.Interface, error) {
 	return c.broadcaster.Watch()
+}
+
+func (c *clusterpolicyreportsgetter) ConvertToTable(ctx context.Context, object runtime.Object, tableOptions runtime.Object) (*metav1beta1.Table, error) {
+	var table metav1beta1.Table
+
+	switch t := object.(type) {
+	case *v1beta1.ClusterPolicyReport:
+		table.ResourceVersion = t.ResourceVersion
+		table.SelfLink = t.SelfLink //nolint:staticcheck // keep deprecated field to be backward compatible
+		addClusterPolicyReportToTable(&table, *t)
+	case *v1beta1.ClusterPolicyReportList:
+		table.ResourceVersion = t.ResourceVersion
+		table.SelfLink = t.SelfLink //nolint:staticcheck // keep deprecated field to be backward compatible
+		table.Continue = t.Continue
+		addClusterPolicyReportToTable(&table, t.Items...)
+	default:
+	}
+
+	return &table, nil
 }
 
 func (c *clusterpolicyreportsgetter) NamespaceScoped() bool {
