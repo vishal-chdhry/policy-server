@@ -20,42 +20,41 @@ import (
 	"k8s.io/apimachinery/pkg/runtime"
 	"k8s.io/apimachinery/pkg/runtime/schema"
 	"k8s.io/apimachinery/pkg/runtime/serializer"
+	utilruntime "k8s.io/apimachinery/pkg/util/runtime"
 	"k8s.io/apiserver/pkg/registry/rest"
 	genericapiserver "k8s.io/apiserver/pkg/server"
-	"k8s.io/metrics/pkg/apis/metrics"
-	"k8s.io/metrics/pkg/apis/metrics/install"
-	"k8s.io/metrics/pkg/apis/metrics/v1beta1"
+	"sigs.k8s.io/wg-policy-prototypes/policy-report/pkg/api/wgpolicyk8s.io/v1beta1"
 )
 
 var (
-	// Scheme contains the types needed by the resource metrics API.
+	// Scheme contains the types needed by the resource API.
 	Scheme = runtime.NewScheme()
-	// Codecs is a codec factory for serving the resource metrics API.
+	// Codecs is a codec factory for serving the resource API.
 	Codecs = serializer.NewCodecFactory(Scheme)
 )
 
 func init() {
-	install.Install(Scheme)
+	utilruntime.Must(v1beta1.AddToScheme(Scheme))
+	utilruntime.Must(Scheme.SetVersionPriority(v1beta1.SchemeGroupVersion))
 	metav1.AddToGroupVersion(Scheme, schema.GroupVersion{Version: "v1"})
 }
 
-// Build constructs APIGroupInfo the metrics.k8s.io API group using the given getters.
-func Build(pod, node rest.Storage) genericapiserver.APIGroupInfo {
-	apiGroupInfo := genericapiserver.NewDefaultAPIGroupInfo(metrics.GroupName, Scheme, metav1.ParameterCodec, Codecs)
+// Build constructs APIGroupInfo the wgpolicyk8s.io API group using the given getters.
+func Build(polr, cpolr rest.Storage) genericapiserver.APIGroupInfo {
+	apiGroupInfo := genericapiserver.NewDefaultAPIGroupInfo(v1beta1.SchemeGroupVersion.Group, Scheme, metav1.ParameterCodec, Codecs)
 	metricsServerResources := map[string]rest.Storage{
-		"nodes": node,
-		"pods":  pod,
+		"policyreports":        cpolr,
+		"clusterpolicyreports": polr,
 	}
 	apiGroupInfo.VersionedResourcesStorageMap[v1beta1.SchemeGroupVersion.Version] = metricsServerResources
 
 	return apiGroupInfo
 }
 
-// Install builds the metrics for the metrics.k8s.io API, and then installs it into the given API metrics-server.
-func Install(store storage.Storage) error {
-	// node := newNodeMetrics(metrics.Resource("nodemetrics"), m, nodeLister, nodeSelector)
-	// pod := newPodMetrics(metrics.Resource("podmetrics"), m, podMetadataLister)
-	// info := Build(pod, node)
-	// return server.InstallAPIGroup(&info)
-	return nil
+// Install builds the metrics for the wgpolicyk8s.io API, and then installs it into the given API policy-server.
+func Install(store storage.Storage, server *genericapiserver.GenericAPIServer) error {
+	polr := PolicyReportGetter(store)
+	cpolr := ClusterPolicyReportGetter(store)
+	info := Build(polr, cpolr)
+	return server.InstallAPIGroup(&info)
 }

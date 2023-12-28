@@ -34,7 +34,7 @@ func (c Config) Complete() (*server, error) {
 	genericServer.Handler.NonGoRestfulMux.HandleFunc("/metrics", metricsHandler)
 
 	store := storage.NewStorage()
-	if err := api.Install(store); err != nil {
+	if err := api.Install(store, genericServer); err != nil {
 		return nil, err
 	}
 
