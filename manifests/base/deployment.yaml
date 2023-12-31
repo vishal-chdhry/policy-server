@@ -1,0 +1,62 @@
+---
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: policy-server
+  namespace: kyverno
+spec:
+  strategy:
+    rollingUpdate:
+      maxUnavailable: 0
+  template:
+    spec:
+      serviceAccountName: policy-server
+      volumes:
+      - name: tmp-dir
+        emptyDir: {}
+      priorityClassName: system-cluster-critical
+      containers:
+      - name: policy-server
+        image: #TODO: BUILD AN IMAGE
+        imagePullPolicy: IfNotPresent
+        args:
+          - --cert-dir=/tmp
+          - --secure-port=10250
+        resources:
+          requests:
+            cpu: 100m
+            memory: 200Mi
+        ports:
+        - name: https
+          containerPort: 10250
+          protocol: TCP
+        readinessProbe:
+          httpGet:
+            path: /readyz
+            port: https
+            scheme: HTTPS
+          periodSeconds: 10
+          failureThreshold: 3
+          initialDelaySeconds: 20
+        livenessProbe:
+          httpGet:
+            path: /livez
+            port: https
+            scheme: HTTPS
+          periodSeconds: 10
+          failureThreshold: 3
+        securityContext:
+          readOnlyRootFilesystem: true
+          runAsNonRoot: true
+          runAsUser: 1000
+          allowPrivilegeEscalation: false
+          seccompProfile:
+            type: RuntimeDefault
+          capabilities:
+            drop:
+              - ALL
+        volumeMounts:
+        - name: tmp-dir
+          mountPath: /tmp
+      nodeSelector:
+        kubernetes.io/os: linux

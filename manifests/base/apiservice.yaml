@@ -1,0 +1,13 @@
+apiVersion: apiregistration.k8s.io/v1
+kind: APIService
+metadata:
+  labels:
+  name: v1alpha2.wgpolicyk8s.io
+spec:
+  group: wgpolicyk8s.io
+  groupPriorityMinimum: 1000
+  version: v1alpha2
+  versionPriority: 100
+  service:
+    name: policy-server
+    namespace: kyverno
