@@ -23,7 +23,7 @@ import (
 	utilruntime "k8s.io/apimachinery/pkg/util/runtime"
 	"k8s.io/apiserver/pkg/registry/rest"
 	genericapiserver "k8s.io/apiserver/pkg/server"
-	"sigs.k8s.io/wg-policy-prototypes/policy-report/pkg/api/wgpolicyk8s.io/v1beta1"
+	"sigs.k8s.io/wg-policy-prototypes/policy-report/pkg/api/wgpolicyk8s.io/v1alpha2"
 )
 
 var (
@@ -34,19 +34,19 @@ var (
 )
 
 func init() {
-	utilruntime.Must(v1beta1.AddToScheme(Scheme))
-	utilruntime.Must(Scheme.SetVersionPriority(v1beta1.SchemeGroupVersion))
+	utilruntime.Must(v1alpha2.AddToScheme(Scheme))
+	utilruntime.Must(Scheme.SetVersionPriority(v1alpha2.SchemeGroupVersion))
 	metav1.AddToGroupVersion(Scheme, schema.GroupVersion{Version: "v1"})
 }
 
 // Build constructs APIGroupInfo the wgpolicyk8s.io API group using the given getters.
 func Build(polr, cpolr rest.Storage) genericapiserver.APIGroupInfo {
-	apiGroupInfo := genericapiserver.NewDefaultAPIGroupInfo(v1beta1.SchemeGroupVersion.Group, Scheme, metav1.ParameterCodec, Codecs)
+	apiGroupInfo := genericapiserver.NewDefaultAPIGroupInfo(v1alpha2.SchemeGroupVersion.Group, Scheme, metav1.ParameterCodec, Codecs)
 	metricsServerResources := map[string]rest.Storage{
 		"policyreports":        cpolr,
 		"clusterpolicyreports": polr,
 	}
-	apiGroupInfo.VersionedResourcesStorageMap[v1beta1.SchemeGroupVersion.Version] = metricsServerResources
+	apiGroupInfo.VersionedResourcesStorageMap[v1alpha2.SchemeGroupVersion.Version] = metricsServerResources
 
 	return apiGroupInfo
 }

@@ -19,10 +19,10 @@ import (
 
 	metav1beta1 "k8s.io/apimachinery/pkg/apis/meta/v1beta1"
 	"k8s.io/apimachinery/pkg/runtime"
-	"sigs.k8s.io/wg-policy-prototypes/policy-report/pkg/api/wgpolicyk8s.io/v1beta1"
+	"sigs.k8s.io/wg-policy-prototypes/policy-report/pkg/api/wgpolicyk8s.io/v1alpha2"
 )
 
-func addPolicyReportToTable(table *metav1beta1.Table, polrs ...v1beta1.PolicyReport) {
+func addPolicyReportToTable(table *metav1beta1.Table, polrs ...v1alpha2.PolicyReport) {
 	for i, polr := range polrs {
 		table.ColumnDefinitions = []metav1beta1.TableColumnDefinition{
 			{Name: "Name", Type: "string", Format: "name", Description: "Name of the resource"},
@@ -48,7 +48,7 @@ func addPolicyReportToTable(table *metav1beta1.Table, polrs ...v1beta1.PolicyRep
 	}
 }
 
-func addClusterPolicyReportToTable(table *metav1beta1.Table, cpolrs ...v1beta1.ClusterPolicyReport) {
+func addClusterPolicyReportToTable(table *metav1beta1.Table, cpolrs ...v1alpha2.ClusterPolicyReport) {
 	for i, cpolr := range cpolrs {
 		table.ColumnDefinitions = []metav1beta1.TableColumnDefinition{
 			{Name: "Name", Type: "string", Format: "name", Description: "Name of the resource"},

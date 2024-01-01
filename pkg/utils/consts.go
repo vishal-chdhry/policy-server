@@ -2,7 +2,7 @@ package utils
 
 const (
 	Group        = "policy-server.io"
-	Version      = "v1alpha1"
+	Version      = "v1alpha2"
 	GroupVersion = Group + "/" + Version
 
 	CAFile   = ""
