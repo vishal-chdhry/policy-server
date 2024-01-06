@@ -23,7 +23,7 @@ spec:
       priorityClassName: system-cluster-critical
       containers:
       - name: policy-server
-        image: ghcr.io/vishal-chdhry/policy-server:v1
+        image: ghcr.io/vishal-chdhry/policy-server:v1.0.3
         imagePullPolicy: IfNotPresent
         args:
           - --cert-dir=/tmp

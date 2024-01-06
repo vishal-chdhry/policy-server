@@ -5,8 +5,10 @@ metadata:
   name: policy-server
   namespace: kyverno
 spec:
+  selector:
+    app: policy-server
   ports:
   - name: https
-    port: 443
+    port: 10250
     protocol: TCP
-    targetPort: 443
+    targetPort: 10250

@@ -31,10 +31,24 @@ var (
 	Scheme = runtime.NewScheme()
 	// Codecs is a codec factory for serving the resource API.
 	Codecs = serializer.NewCodecFactory(Scheme)
+	// SchemeBuilder is the scheme builder with scheme init functions to run for this API package
+	SchemeBuilder = runtime.NewSchemeBuilder(addKnownTypes)
+	// AddToScheme is a common registration function for mapping packaged scoped group & version keys to a scheme
+	AddToScheme = SchemeBuilder.AddToScheme
 )
 
+func addKnownTypes(scheme *runtime.Scheme) error {
+	scheme.AddKnownTypes(v1alpha2.SchemeGroupVersion,
+		&v1alpha2.ClusterPolicyReport{},
+		&v1alpha2.ClusterPolicyReportList{},
+		&v1alpha2.PolicyReport{},
+		&v1alpha2.PolicyReportList{},
+	)
+	return nil
+}
+
 func init() {
-	utilruntime.Must(v1alpha2.AddToScheme(Scheme))
+	utilruntime.Must(AddToScheme(Scheme))
 	utilruntime.Must(Scheme.SetVersionPriority(v1alpha2.SchemeGroupVersion))
 	metav1.AddToGroupVersion(Scheme, schema.GroupVersion{Version: "v1"})
 }
@@ -43,8 +57,8 @@ func init() {
 func Build(polr, cpolr rest.Storage) genericapiserver.APIGroupInfo {
 	apiGroupInfo := genericapiserver.NewDefaultAPIGroupInfo(v1alpha2.SchemeGroupVersion.Group, Scheme, metav1.ParameterCodec, Codecs)
 	metricsServerResources := map[string]rest.Storage{
-		"policyreports":        cpolr,
-		"clusterpolicyreports": polr,
+		"policyreports":        polr,
+		"clusterpolicyreports": cpolr,
 	}
 	apiGroupInfo.VersionedResourcesStorageMap[v1alpha2.SchemeGroupVersion.Version] = metricsServerResources
 
