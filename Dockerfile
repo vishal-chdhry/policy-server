@@ -3,21 +3,21 @@
 ARG ARCH
 FROM golang:1.21.5 as build
 
-WORKDIR /go/src/github.com/kyverno/policy-server
-COPY go.mod .
-COPY go.sum .
-RUN go mod download
+WORKDIR /
+COPY . ./
+# RUN go mod download
 
-COPY pkg pkg
-COPY cmd cmd
-COPY Makefile Makefile
+# COPY pkg pkg
+# COPY cmd cmd
+# COPY Makefile Makefile
 
-ARG ARCH
-ARG GIT_COMMIT
-ARG GIT_TAG
-RUN make policy-server
+# ARG ARCH
+# ARG GIT_COMMIT
+# ARG GIT_TAG
+RUN GOOS=linux GOARCH=arm64 CGO_ENABLED=0 go build -ldflags="-w -s" -o policy-server ./cmd/main.go
 
-FROM gcr.io/distroless/static:latest-$ARCH
-COPY --from=build /go/src/github.com/kyverno/policy-server /
+FROM gcr.io/distroless/static:nonroot
+WORKDIR /
+COPY --from=build policy-server policy-server
 USER 65534
 ENTRYPOINT ["/policy-server"]

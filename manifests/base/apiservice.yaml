@@ -11,3 +11,4 @@ spec:
   service:
     name: policy-server
     namespace: kyverno
+    port: 443

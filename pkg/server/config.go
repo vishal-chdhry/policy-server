@@ -22,7 +22,7 @@ type Config struct {
 
 func (c Config) Complete() (*server, error) {
 	// Disable default metrics handler and create custom one
-	c.Apiserver.EnableMetrics = true
+	c.Apiserver.EnableMetrics = false
 	metricsHandler, err := c.metricsHandler()
 	if err != nil {
 		return nil, err

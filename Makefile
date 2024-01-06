@@ -1,7 +1,7 @@
 # Common User-Settable Flags
 # --------------------------
 REGISTRY?=ghcr.io/vishal-chdhry/policy-server
-ARCH?=amd64
+ARCH?=a64
 OS?=linux
 BINARY_NAME?=policy-server-$(OS)-$(ARCH)
 
@@ -55,7 +55,7 @@ policy-server:
 .PHONY: build
 build: $(SRC_DEPS)
 	@mkdir -p $(OUTPUT_DIR)
-	GOARCH=$(ARCH) GOOS=$(OS) CGO_ENABLED=0 go build -mod=readonly -trimpath -ldflags "$(LDFLAGS)" -o "$(OUTPUT_DIR)/$(BINARY_NAME)" sgithub.com/kyverno/policy-server/cmd/policy-server
+	GOARCH=$(ARCH) GOOS=$(OS) CGO_ENABLED=0 go build -mod=readonly -trimpath -ldflags "$(LDFLAGS)" -o "$(OUTPUT_DIR)/$(BINARY_NAME)" .
 
 .PHONY: build-all
 build-all:

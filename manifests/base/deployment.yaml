@@ -8,7 +8,13 @@ spec:
   strategy:
     rollingUpdate:
       maxUnavailable: 0
+  selector:
+    matchLabels:
+      app: policy-server
   template:
+    metadata:
+        labels:
+          app: policy-server
     spec:
       serviceAccountName: policy-server
       volumes:
@@ -17,7 +23,7 @@ spec:
       priorityClassName: system-cluster-critical
       containers:
       - name: policy-server
-        image: #TODO: BUILD AN IMAGE
+        image: ghcr.io/vishal-chdhry/policy-server:v1
         imagePullPolicy: IfNotPresent
         args:
           - --cert-dir=/tmp
