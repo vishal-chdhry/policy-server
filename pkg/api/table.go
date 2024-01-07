@@ -40,7 +40,7 @@ func addPolicyReportToTable(table *metav1beta1.Table, polrs ...v1alpha2.PolicyRe
 		row = append(row, polr.Summary.Warn)
 		row = append(row, polr.Summary.Error)
 		row = append(row, polr.Summary.Skip)
-		row = append(row, time.Since(polr.CreationTimestamp.Time).String())
+		row = append(row, time.Since(polr.CreationTimestamp.Time).Truncate(time.Second).String())
 		table.Rows = append(table.Rows, metav1beta1.TableRow{
 			Cells:  row,
 			Object: runtime.RawExtension{Object: &polrs[i]},
@@ -66,7 +66,7 @@ func addClusterPolicyReportToTable(table *metav1beta1.Table, cpolrs ...v1alpha2.
 		row = append(row, cpolr.Summary.Warn)
 		row = append(row, cpolr.Summary.Error)
 		row = append(row, cpolr.Summary.Skip)
-		row = append(row, time.Since(cpolr.CreationTimestamp.Time).String())
+		row = append(row, time.Since(cpolr.CreationTimestamp.Time).Truncate(time.Second).String())
 		table.Rows = append(table.Rows, metav1beta1.TableRow{
 			Cells:  row,
 			Object: runtime.RawExtension{Object: &cpolrs[i]},
