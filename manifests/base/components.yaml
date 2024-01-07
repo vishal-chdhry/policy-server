@@ -27,29 +27,6 @@ rules:
   - watch
 ---
 apiVersion: rbac.authorization.k8s.io/v1
-kind: ClusterRole
-metadata:
-  labels:
-    k8s-app: policy-server
-  name: system:policy-server
-rules:
-- apiGroups:
-  - ""
-  resources:
-  - nodes/metrics
-  verbs:
-  - get
-- apiGroups:
-  - ""
-  resources:
-  - pods
-  - nodes
-  verbs:
-  - get
-  - list
-  - watch
----
-apiVersion: rbac.authorization.k8s.io/v1
 kind: RoleBinding
 metadata:
   labels:
@@ -75,21 +52,6 @@ roleRef:
   apiGroup: rbac.authorization.k8s.io
   kind: ClusterRole
   name: system:auth-delegator
-subjects:
-- kind: ServiceAccount
-  name: policy-server
-  namespace: kyverno
----
-apiVersion: rbac.authorization.k8s.io/v1
-kind: ClusterRoleBinding
-metadata:
-  labels:
-    k8s-app: policy-server
-  name: system:policy-server
-roleRef:
-  apiGroup: rbac.authorization.k8s.io
-  kind: ClusterRole
-  name: system:policy-server
 subjects:
 - kind: ServiceAccount
   name: policy-server
@@ -136,7 +98,7 @@ spec:
         - --cert-dir=/tmp
         - --secure-port=4443
         - --metric-resolution=15s
-        image: ghcr.io/vishal-chdhry/policy-server:sandbox-4
+        image: ghcr.io/vishal-chdhry/policy-server:demo
         imagePullPolicy: IfNotPresent
         livenessProbe:
           failureThreshold: 3
