@@ -321,7 +321,7 @@ func (p *polrStore) createPolr(report *v1alpha2.PolicyReport) error {
 	if err != nil {
 		return errorpkg.Wrapf(err, "could not marshal report")
 	}
-	return p.store.Update(context.TODO(), key, 1, val)
+	return p.store.Create(context.TODO(), key, val)
 }
 
 func (p *polrStore) updatePolr(report *v1alpha2.PolicyReport, force bool) error {

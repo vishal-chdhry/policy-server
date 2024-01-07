@@ -1,14 +1,15 @@
----
 apiVersion: v1
 kind: Service
 metadata:
+  labels:
+    k8s-app: policy-server
   name: policy-server
   namespace: kyverno
 spec:
-  selector:
-    app: policy-server
   ports:
   - name: https
-    port: 10250
+    port: 443
     protocol: TCP
-    targetPort: 10250
+    targetPort: https
+  selector:
+    k8s-app: metrics-server

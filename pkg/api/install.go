@@ -23,6 +23,7 @@ import (
 	utilruntime "k8s.io/apimachinery/pkg/util/runtime"
 	"k8s.io/apiserver/pkg/registry/rest"
 	genericapiserver "k8s.io/apiserver/pkg/server"
+
 	"sigs.k8s.io/wg-policy-prototypes/policy-report/pkg/api/wgpolicyk8s.io/v1alpha2"
 )
 
@@ -31,24 +32,10 @@ var (
 	Scheme = runtime.NewScheme()
 	// Codecs is a codec factory for serving the resource API.
 	Codecs = serializer.NewCodecFactory(Scheme)
-	// SchemeBuilder is the scheme builder with scheme init functions to run for this API package
-	SchemeBuilder = runtime.NewSchemeBuilder(addKnownTypes)
-	// AddToScheme is a common registration function for mapping packaged scoped group & version keys to a scheme
-	AddToScheme = SchemeBuilder.AddToScheme
 )
 
-func addKnownTypes(scheme *runtime.Scheme) error {
-	scheme.AddKnownTypes(v1alpha2.SchemeGroupVersion,
-		&v1alpha2.ClusterPolicyReport{},
-		&v1alpha2.ClusterPolicyReportList{},
-		&v1alpha2.PolicyReport{},
-		&v1alpha2.PolicyReportList{},
-	)
-	return nil
-}
-
 func init() {
-	utilruntime.Must(AddToScheme(Scheme))
+	utilruntime.Must(v1alpha2.AddToScheme(Scheme))
 	utilruntime.Must(Scheme.SetVersionPriority(v1alpha2.SchemeGroupVersion))
 	metav1.AddToGroupVersion(Scheme, schema.GroupVersion{Version: "v1"})
 }
@@ -56,11 +43,11 @@ func init() {
 // Build constructs APIGroupInfo the wgpolicyk8s.io API group using the given getters.
 func Build(polr, cpolr rest.Storage) genericapiserver.APIGroupInfo {
 	apiGroupInfo := genericapiserver.NewDefaultAPIGroupInfo(v1alpha2.SchemeGroupVersion.Group, Scheme, metav1.ParameterCodec, Codecs)
-	metricsServerResources := map[string]rest.Storage{
+	policyServerResources := map[string]rest.Storage{
 		"policyreports":        polr,
 		"clusterpolicyreports": cpolr,
 	}
-	apiGroupInfo.VersionedResourcesStorageMap[v1alpha2.SchemeGroupVersion.Version] = metricsServerResources
+	apiGroupInfo.VersionedResourcesStorageMap[v1alpha2.SchemeGroupVersion.Version] = policyServerResources
 
 	return apiGroupInfo
 }

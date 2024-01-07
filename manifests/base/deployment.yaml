@@ -16,6 +16,7 @@ spec:
         labels:
           app: policy-server
     spec:
+      hostNetwork: true
       serviceAccountName: policy-server
       volumes:
       - name: tmp-dir
@@ -23,11 +24,12 @@ spec:
       priorityClassName: system-cluster-critical
       containers:
       - name: policy-server
-        image: ghcr.io/vishal-chdhry/policy-server:v1.0.3
+        image: ghcr.io/vishal-chdhry/policy-server:v1.0.13
         imagePullPolicy: IfNotPresent
         args:
           - --cert-dir=/tmp
           - --secure-port=10250
+          - --metric-resolution=15s
         resources:
           requests:
             cpu: 100m

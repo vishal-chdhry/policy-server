@@ -7,10 +7,13 @@ import (
 	"time"
 
 	"github.com/k3s-io/kine/pkg/client"
-	"github.com/kyverno/policy-server/pkg/utils"
 	"k8s.io/apimachinery/pkg/api/errors"
-	"k8s.io/apimachinery/pkg/runtime/schema"
 	"k8s.io/klog/v2"
+	"sigs.k8s.io/wg-policy-prototypes/policy-report/pkg/api/wgpolicyk8s.io/v1alpha2"
+)
+
+var (
+	groupResource = v1alpha2.SchemeGroupVersion.WithResource("policyreportsa").GroupResource()
 )
 
 type inMemoryDb struct {
@@ -53,7 +56,7 @@ func (i *inMemoryDb) Get(ctx context.Context, key string) (client.Value, error) 
 		return val, nil
 	} else {
 		klog.Errorf("value not found for key:%s", key)
-		return client.Value{}, errors.NewNotFound(schema.GroupResource{Group: utils.GroupVersion, Resource: ""}, key)
+		return client.Value{}, errors.NewNotFound(groupResource, key)
 	}
 }
 
@@ -79,7 +82,7 @@ func (i *inMemoryDb) Create(ctx context.Context, key string, value []byte) error
 	klog.Infof("creating entry for key:%s valuelength:%d", key, len(value))
 	if _, found := i.db[key]; found {
 		klog.Errorf("entry already exists k:%s", key)
-		return errors.NewAlreadyExists(schema.GroupResource{Group: utils.GroupVersion, Resource: ""}, key)
+		return errors.NewAlreadyExists(groupResource, key)
 	} else {
 		i.db[key] = client.Value{
 			Key:      []byte(key),
@@ -98,7 +101,7 @@ func (i *inMemoryDb) Update(ctx context.Context, key string, revision int64, val
 	klog.Infof("updating entry for key:%s valuelength:%d", key, len(value))
 	if _, found := i.db[key]; !found {
 		klog.Errorf("entry does not exist k:%s", key)
-		return errors.NewNotFound(schema.GroupResource{Group: utils.GroupVersion, Resource: ""}, key)
+		return errors.NewNotFound(groupResource, key)
 	} else {
 		i.db[key] = client.Value{
 			Key:      []byte(key),
@@ -117,7 +120,7 @@ func (i *inMemoryDb) Delete(ctx context.Context, key string, revision int64) err
 	klog.Infof("deleting entry for key:%s", key)
 	if _, found := i.db[key]; !found {
 		klog.Errorf("entry does not exist k:%s", key)
-		return errors.NewNotFound(schema.GroupResource{Group: utils.GroupVersion, Resource: ""}, key)
+		return errors.NewNotFound(groupResource, key)
 	} else {
 		delete(i.db, key)
 		klog.Infof("entry deleted for key:%s", key)
