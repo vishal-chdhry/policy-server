@@ -57,7 +57,7 @@ func (o *Options) validate() []error {
 
 func (o *Options) Flags() (fs flag.NamedFlagSets) {
 	msfs := fs.FlagSet("policy server")
-	msfs.DurationVar(&o.MetricResolution, "metric-resolution", o.MetricResolution, "The resolution at which metrics-server will retain metrics, must set value at least 10s.")
+	msfs.DurationVar(&o.MetricResolution, "metric-resolution", o.MetricResolution, "The resolution at which policy-server will retain metrics, must set value at least 10s.")
 	msfs.BoolVar(&o.ShowVersion, "version", false, "Show version")
 	msfs.StringVar(&o.Kubeconfig, "kubeconfig", o.Kubeconfig, "The path to the kubeconfig used to connect to the Kubernetes API server and the Kubelets (defaults to in-cluster config)")
 
@@ -71,7 +71,7 @@ func (o *Options) Flags() (fs flag.NamedFlagSets) {
 	return fs
 }
 
-// NewOptions constructs a new set of default options for metrics-server.
+// NewOptions constructs a new set of default options for policy-server.
 func NewOptions() *Options {
 	return &Options{
 		SecureServing:  genericoptions.NewSecureServingOptions().WithLoopback(),
