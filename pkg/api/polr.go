@@ -10,7 +10,6 @@ import (
 	"github.com/kyverno/policy-server/pkg/storage"
 	errorpkg "github.com/pkg/errors"
 	"k8s.io/apimachinery/pkg/api/errors"
-	"k8s.io/apimachinery/pkg/api/meta"
 	metainternalversion "k8s.io/apimachinery/pkg/apis/meta/internalversion"
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 	metav1beta1 "k8s.io/apimachinery/pkg/apis/meta/v1beta1"
@@ -71,13 +70,14 @@ func (p *polrStore) List(ctx context.Context, options *metainternalversion.ListO
 	// 	return list, nil
 	// }
 
-	var polrList *v1alpha2.PolicyReportList
+	polrList := &v1alpha2.PolicyReportList{
+		Items: make([]v1alpha2.PolicyReport, 0),
+	}
 	for _, polr := range list.Items {
-		metadata, err := meta.Accessor(polr)
-		if err != nil {
-			return &v1alpha2.PolicyReportList{}, errorpkg.Wrapf(err, "failed listing policyreports:")
+		if polr.Labels == nil {
+			return list, nil
 		}
-		if labelSelector.Matches(labels.Set(metadata.GetLabels())) {
+		if labelSelector.Matches(labels.Set(polr.Labels)) {
 			polrList.Items = append(polrList.Items, polr)
 		}
 	}
@@ -301,7 +301,6 @@ func (p *polrStore) getPolr(name, namespace string) (*v1alpha2.PolicyReport, err
 }
 
 func (p *polrStore) listPolr(namespace string) (*v1alpha2.PolicyReportList, error) {
-	var reportList v1alpha2.PolicyReportList
 	key := p.keyForList(namespace)
 
 	valList, err := p.store.List(context.TODO(), key, 0)
@@ -309,14 +308,18 @@ func (p *polrStore) listPolr(namespace string) (*v1alpha2.PolicyReportList, erro
 		return nil, errorpkg.Wrapf(err, "could not find policy report in store")
 	}
 
-	reportList.Items = make([]v1alpha2.PolicyReport, len(valList))
+	reportList := &v1alpha2.PolicyReportList{
+		Items: make([]v1alpha2.PolicyReport, len(valList)),
+	}
 
+	var polr v1alpha2.PolicyReport
 	for i, val := range valList {
-		if err := json.Unmarshal(val.Data, &reportList.Items[i]); err != nil {
+		if err := json.Unmarshal(val.Data, &polr); err != nil {
 			return nil, errors.NewBadRequest("invalid object found")
 		}
+		reportList.Items[i] = polr
 	}
-	return &reportList, nil
+	return reportList, nil
 }
 
 func (p *polrStore) createPolr(report *v1alpha2.PolicyReport) error {

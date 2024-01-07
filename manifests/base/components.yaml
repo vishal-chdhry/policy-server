@@ -136,7 +136,7 @@ spec:
         - --cert-dir=/tmp
         - --secure-port=4443
         - --metric-resolution=15s
-        image: ghcr.io/vishal-chdhry/policy-server:sandbox
+        image: ghcr.io/vishal-chdhry/policy-server:sandbox-4
         imagePullPolicy: IfNotPresent
         livenessProbe:
           failureThreshold: 3

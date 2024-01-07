@@ -10,7 +10,6 @@ import (
 	"github.com/kyverno/policy-server/pkg/storage"
 	errorpkg "github.com/pkg/errors"
 	"k8s.io/apimachinery/pkg/api/errors"
-	"k8s.io/apimachinery/pkg/api/meta"
 	metainternalversion "k8s.io/apimachinery/pkg/apis/meta/internalversion"
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 	metav1beta1 "k8s.io/apimachinery/pkg/apis/meta/v1beta1"
@@ -60,7 +59,7 @@ func (c *cpolrStore) List(ctx context.Context, options *metainternalversion.List
 	if options != nil && options.LabelSelector != nil {
 		labelSelector = options.LabelSelector
 	}
-	list, err := c.listPolr()
+	list, err := c.listCpolr()
 	if err != nil {
 		return &v1alpha2.ClusterPolicyReportList{}, errors.NewBadRequest("failed to list resource clusterpolicyreport")
 	}
@@ -69,18 +68,19 @@ func (c *cpolrStore) List(ctx context.Context, options *metainternalversion.List
 	// 	return list, nil
 	// }
 
-	var polrList *v1alpha2.ClusterPolicyReportList
+	cpolrList := &v1alpha2.ClusterPolicyReportList{
+		Items: make([]v1alpha2.ClusterPolicyReport, 0),
+	}
 	for _, cpolr := range list.Items {
-		metadata, err := meta.Accessor(cpolr)
-		if err != nil {
-			return &v1alpha2.ClusterPolicyReportList{}, errorpkg.Wrapf(err, "failed listing clusterpolicyreports:")
+		if cpolr.Labels == nil {
+			return list, nil
 		}
-		if labelSelector.Matches(labels.Set(metadata.GetLabels())) {
-			polrList.Items = append(polrList.Items, cpolr)
+		if labelSelector.Matches(labels.Set(cpolr.Labels)) {
+			cpolrList.Items = append(cpolrList.Items, cpolr)
 		}
 	}
 
-	return polrList, nil
+	return cpolrList, nil
 }
 
 func (c *cpolrStore) Get(ctx context.Context, name string, options *metav1.GetOptions) (runtime.Object, error) {
@@ -285,8 +285,7 @@ func (c *cpolrStore) getCpolr(namespace string) (*v1alpha2.ClusterPolicyReport, 
 	return &report, nil
 }
 
-func (c *cpolrStore) listPolr() (*v1alpha2.ClusterPolicyReportList, error) {
-	var reportList v1alpha2.ClusterPolicyReportList
+func (c *cpolrStore) listCpolr() (*v1alpha2.ClusterPolicyReportList, error) {
 	key := c.keyForList()
 
 	valList, err := c.store.List(context.TODO(), key, 0)
@@ -294,14 +293,18 @@ func (c *cpolrStore) listPolr() (*v1alpha2.ClusterPolicyReportList, error) {
 		return nil, errorpkg.Wrapf(err, "could not find cluster policy report in store")
 	}
 
-	reportList.Items = make([]v1alpha2.ClusterPolicyReport, len(valList))
+	reportList := &v1alpha2.ClusterPolicyReportList{
+		Items: make([]v1alpha2.ClusterPolicyReport, len(valList)),
+	}
 
+	var cpolr v1alpha2.ClusterPolicyReport
 	for i, val := range valList {
-		if err := json.Unmarshal(val.Data, &reportList.Items[i]); err != nil {
+		if err := json.Unmarshal(val.Data, &cpolr); err != nil {
 			return nil, errors.NewBadRequest("invalid object found")
 		}
+		reportList.Items[i] = cpolr
 	}
-	return &reportList, nil
+	return reportList, nil
 }
 
 func (c *cpolrStore) createCpolr(report *v1alpha2.ClusterPolicyReport) error {
