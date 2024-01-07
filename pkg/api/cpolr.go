@@ -65,9 +65,9 @@ func (c *cpolrStore) List(ctx context.Context, options *metainternalversion.List
 		return &v1alpha2.ClusterPolicyReportList{}, errors.NewBadRequest("failed to list resource clusterpolicyreport")
 	}
 
-	if labelSelector == labels.Everything() {
-		return list, nil
-	}
+	// if labelSelector.String() == labels.Everything().String() {
+	// 	return list, nil
+	// }
 
 	var polrList *v1alpha2.ClusterPolicyReportList
 	for _, cpolr := range list.Items {

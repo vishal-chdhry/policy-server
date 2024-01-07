@@ -67,9 +67,9 @@ func (p *polrStore) List(ctx context.Context, options *metainternalversion.ListO
 		return &v1alpha2.PolicyReportList{}, errors.NewBadRequest("failed to list resource policyreport")
 	}
 
-	if labelSelector == labels.Everything() {
-		return list, nil
-	}
+	// if labelSelector == labels.Everything() {
+	// 	return list, nil
+	// }
 
 	var polrList *v1alpha2.PolicyReportList
 	for _, polr := range list.Items {
@@ -114,6 +114,11 @@ func (p *polrStore) Create(ctx context.Context, obj runtime.Object, createValida
 	polr, ok := obj.(*v1alpha2.PolicyReport)
 	if !ok {
 		return &v1alpha2.PolicyReport{}, errors.NewBadRequest("failed to validate policy report")
+	}
+
+	namespace := genericapirequest.NamespaceValue(ctx)
+	if len(polr.Namespace) == 0 {
+		polr.Namespace = namespace
 	}
 
 	if !isDryRun {
@@ -168,8 +173,12 @@ func (p *polrStore) Update(ctx context.Context, name string, objInfo rest.Update
 		return &v1alpha2.PolicyReport{}, false, errors.NewBadRequest("failed to validate policy report")
 	}
 
+	if len(polr.Namespace) == 0 {
+		polr.Namespace = namespace
+	}
+
 	if !isDryRun {
-		err := p.createPolr(polr)
+		err := p.updatePolr(polr, false)
 		if err != nil {
 			return &v1alpha2.PolicyReport{}, false, errors.NewBadRequest(fmt.Sprintf("cannot create policy report: %s", err.Error()))
 		}

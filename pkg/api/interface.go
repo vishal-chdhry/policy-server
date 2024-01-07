@@ -9,5 +9,5 @@ type API interface {
 	rest.KindProvider
 	rest.Scoper
 	rest.SingularNameProvider
-	rest.StandardStorage // Create, Update, Delete, DeleteCollection, Watch
+	rest.StandardStorage
 }
