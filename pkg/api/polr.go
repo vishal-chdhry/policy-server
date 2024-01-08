@@ -237,7 +237,7 @@ func (p *polrStore) DeleteCollection(ctx context.Context, deleteValidation rest.
 			obj, isDeleted, err := p.Delete(ctx, polr.GetName(), deleteValidation, options)
 			if !isDeleted {
 				klog.ErrorS(err, "Failed to delete polr", "name", polr.GetName(), "namespace", klog.KRef("", namespace))
-				return &v1alpha2.PolicyReportList{}, errors.NewBadRequest(fmt.Sprintf("Failed to delete policy report: %s/%s", polr.GetNamespace(), polr.GetName()))
+				return &v1alpha2.PolicyReportList{}, errors.NewBadRequest(fmt.Sprintf("Failed to delete policy report: %s/%s", polr.Namespace, polr.GetName()))
 			}
 			p.broadcaster.Action(watch.Deleted, obj)
 		}
@@ -269,7 +269,7 @@ func (p *polrStore) ConvertToTable(ctx context.Context, object runtime.Object, t
 }
 
 func (p *polrStore) NamespaceScoped() bool {
-	return false
+	return true
 }
 
 func (p *polrStore) GetSingularName() string {
@@ -323,7 +323,7 @@ func (p *polrStore) listPolr(namespace string) (*v1alpha2.PolicyReportList, erro
 }
 
 func (p *polrStore) createPolr(report *v1alpha2.PolicyReport) error {
-	key := p.key(report.GetName(), report.GetNamespace())
+	key := p.key(report.Name, report.Namespace)
 
 	report.ResourceVersion = fmt.Sprint(1)
 	report.UID = uuid.NewUUID()
@@ -337,9 +337,9 @@ func (p *polrStore) createPolr(report *v1alpha2.PolicyReport) error {
 }
 
 func (p *polrStore) updatePolr(report *v1alpha2.PolicyReport, force bool) error {
-	key := p.key(report.GetName(), report.GetNamespace())
+	key := p.key(report.Name, report.Namespace)
 	if !force {
-		oldReport, err := p.getPolr(report.GetName(), report.GetNamespace())
+		oldReport, err := p.getPolr(report.GetName(), report.Namespace)
 		if err != nil {
 			return errorpkg.Wrapf(err, "old policy report not found")
 		}
@@ -362,7 +362,7 @@ func (p *polrStore) updatePolr(report *v1alpha2.PolicyReport, force bool) error 
 }
 
 func (p *polrStore) deletePolr(report *v1alpha2.PolicyReport) error {
-	key := p.key(report.GetName(), report.GetNamespace())
+	key := p.key(report.Name, report.Namespace)
 
 	rev, err := strconv.ParseInt(report.ResourceVersion, 10, 64)
 	if err != nil {

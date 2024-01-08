@@ -222,7 +222,7 @@ func (c *cpolrStore) DeleteCollection(ctx context.Context, deleteValidation rest
 			obj, isDeleted, err := c.Delete(ctx, cpolr.GetName(), deleteValidation, options)
 			if !isDeleted {
 				klog.ErrorS(err, "Failed to delete cpolr", "name", cpolr.GetName())
-				return &v1alpha2.ClusterPolicyReportList{}, errors.NewBadRequest(fmt.Sprintf("Failed to delete cluster policy report: %s/%s", cpolr.GetNamespace(), cpolr.GetName()))
+				return &v1alpha2.ClusterPolicyReportList{}, errors.NewBadRequest(fmt.Sprintf("Failed to delete cluster policy report: %s", cpolr.GetName()))
 			}
 			c.broadcaster.Action(watch.Deleted, obj)
 		}
@@ -254,7 +254,7 @@ func (c *cpolrStore) ConvertToTable(ctx context.Context, object runtime.Object, 
 }
 
 func (c *cpolrStore) NamespaceScoped() bool {
-	return true
+	return false
 }
 
 func (c *cpolrStore) GetSingularName() string {
@@ -269,9 +269,9 @@ func (c *cpolrStore) keyForList() string {
 	return fmt.Sprintf("/apis/%s/clusterpolicyreports/", v1alpha2.SchemeGroupVersion)
 }
 
-func (c *cpolrStore) getCpolr(namespace string) (*v1alpha2.ClusterPolicyReport, error) {
+func (c *cpolrStore) getCpolr(name string) (*v1alpha2.ClusterPolicyReport, error) {
 	var report v1alpha2.ClusterPolicyReport
-	key := c.key(namespace)
+	key := c.key(name)
 
 	val, err := c.store.Get(context.TODO(), key)
 	if err != nil {
@@ -308,7 +308,7 @@ func (c *cpolrStore) listCpolr() (*v1alpha2.ClusterPolicyReportList, error) {
 }
 
 func (c *cpolrStore) createCpolr(report *v1alpha2.ClusterPolicyReport) error {
-	key := c.key(report.GetNamespace())
+	key := c.key(report.Name)
 
 	report.ResourceVersion = fmt.Sprint(1)
 	report.UID = uuid.NewUUID()
