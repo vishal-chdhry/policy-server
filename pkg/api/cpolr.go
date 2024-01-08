@@ -12,6 +12,7 @@ import (
 	"k8s.io/apimachinery/pkg/api/errors"
 	metainternalversion "k8s.io/apimachinery/pkg/apis/meta/internalversion"
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
+	"k8s.io/apimachinery/pkg/apis/meta/v1/unstructured"
 	metav1beta1 "k8s.io/apimachinery/pkg/apis/meta/v1beta1"
 	"k8s.io/apimachinery/pkg/labels"
 	"k8s.io/apimachinery/pkg/runtime"
@@ -196,7 +197,12 @@ func (c *cpolrStore) Delete(ctx context.Context, name string, deleteValidation r
 		}
 		c.broadcaster.Action(watch.Deleted, cpolr)
 	}
-	return &runtime.Unknown{}, true, nil
+
+	obj, err := c.cpolrToObj(cpolr)
+	if err != nil {
+		return nil, false, err
+	}
+	return obj, true, nil // TODO: Add protobuf in wgpolicygroup
 }
 
 func (c *cpolrStore) DeleteCollection(ctx context.Context, deleteValidation rest.ValidateObjectFunc, options *metav1.DeleteOptions, listOptions *metainternalversion.ListOptions) (runtime.Object, error) {
@@ -268,6 +274,19 @@ func (c *cpolrStore) key(name string) string {
 
 func (c *cpolrStore) keyForList() string {
 	return fmt.Sprintf("/apis/%s/clusterpolicyreports/", v1alpha2.SchemeGroupVersion)
+}
+
+func (c *cpolrStore) cpolrToObj(cpolr *v1alpha2.ClusterPolicyReport) (runtime.Object, error) {
+	var unst unstructured.Unstructured
+	var bytes []byte
+	var err error
+	if bytes, err = json.Marshal(cpolr); err != nil {
+		return nil, err
+	}
+	if err = json.Unmarshal(bytes, &unst); err != nil {
+		return nil, err
+	}
+	return unst.DeepCopyObject(), nil
 }
 
 func (c *cpolrStore) getCpolr(name string) (*v1alpha2.ClusterPolicyReport, error) {

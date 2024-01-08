@@ -12,6 +12,7 @@ import (
 	"k8s.io/apimachinery/pkg/api/errors"
 	metainternalversion "k8s.io/apimachinery/pkg/apis/meta/internalversion"
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
+	"k8s.io/apimachinery/pkg/apis/meta/v1/unstructured"
 	metav1beta1 "k8s.io/apimachinery/pkg/apis/meta/v1beta1"
 	"k8s.io/apimachinery/pkg/labels"
 	"k8s.io/apimachinery/pkg/runtime"
@@ -210,7 +211,12 @@ func (p *polrStore) Delete(ctx context.Context, name string, deleteValidation re
 		}
 		p.broadcaster.Action(watch.Deleted, polr)
 	}
-	return &runtime.Unknown{}, true, nil // TODO: Add protobuf in wgpolicygroup
+
+	obj, err := p.polrToObj(polr)
+	if err != nil {
+		return nil, false, err
+	}
+	return obj, true, nil // TODO: Add protobuf in wgpolicygroup
 }
 
 func (p *polrStore) DeleteCollection(ctx context.Context, deleteValidation rest.ValidateObjectFunc, options *metav1.DeleteOptions, listOptions *metainternalversion.ListOptions) (runtime.Object, error) {
@@ -283,6 +289,19 @@ func (p *polrStore) key(name, namespace string) string {
 
 func (p *polrStore) keyForList(namespace string) string {
 	return fmt.Sprintf("/apis/%s/namespaces/%s/policyreports/", v1alpha2.SchemeGroupVersion, namespace)
+}
+
+func (c *polrStore) polrToObj(cpolr *v1alpha2.PolicyReport) (runtime.Object, error) {
+	var unst unstructured.Unstructured
+	var bytes []byte
+	var err error
+	if bytes, err = json.Marshal(cpolr); err != nil {
+		return nil, err
+	}
+	if err = json.Unmarshal(bytes, &unst); err != nil {
+		return nil, err
+	}
+	return unst.DeepCopyObject(), nil
 }
 
 func (p *polrStore) getPolr(name, namespace string) (*v1alpha2.PolicyReport, error) {
