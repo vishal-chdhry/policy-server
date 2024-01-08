@@ -3,11 +3,12 @@ kind: PolicyReport
 metadata:
   name: test
   namespace: default
-  ownerReferences:
-  - apiVersion: v1
-    kind: Pod
-    name: test-amutate
-    uid: 6c737f35-260c-4e4f-8516-61a125c9fb78
+  # ownerReferences:
+  # - apiVersion: v1
+  #   kind: Pod
+  #   name: non-existent
+  #   namespace: default
+  #   uid: 6c737f35-260c-4e4f-8516-61a125c9fb78
 results:
 - message: validation rule 'call-aws-signer-extension' passed.
   policy: validate-images
@@ -21,8 +22,8 @@ results:
 scope:
   apiVersion: v1
   kind: Pod
-  name: test-amutate
-  namespace: test-notation
+  name: non-existent
+  namespace: default
   uid: 6c737f35-260c-4e4f-8516-61a125c9fb78
 summary:
   error: 0
