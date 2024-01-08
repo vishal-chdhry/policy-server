@@ -11,11 +11,14 @@ type Storage interface {
 	client.Client
 }
 
-func NewStorage(debug bool) Storage {
-	klog.Info("setting up storage", "debug", debug)
+func NewStorage(debug bool) (Storage, error) {
+	klog.Info("setting up storage", "debug=", debug)
 	if debug {
-		return inmemory.New()
+		return inmemory.New(), nil
 	}
-	kineClient, _ := kine.New()
-	return kineClient
+	kineClient, err := kine.New()
+	if err != nil {
+		return nil, err
+	}
+	return kineClient, nil
 }
