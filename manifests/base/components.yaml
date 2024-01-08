@@ -95,6 +95,7 @@ spec:
       hostNetwork: true
       containers:
       - args:
+        - --debug
         - --cert-dir=/tmp
         - --secure-port=4443
         - --metric-resolution=15s

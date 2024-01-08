@@ -18,6 +18,7 @@ type Config struct {
 	Apiserver        *genericapiserver.Config
 	Rest             *rest.Config
 	MetricResolution time.Duration
+	Debug            bool
 }
 
 func (c Config) Complete() (*server, error) {
@@ -33,7 +34,7 @@ func (c Config) Complete() (*server, error) {
 	}
 	genericServer.Handler.NonGoRestfulMux.HandleFunc("/metrics", metricsHandler)
 
-	store := storage.NewStorage()
+	store := storage.NewStorage(c.Debug)
 	if err := api.Install(store, genericServer); err != nil {
 		return nil, err
 	}
