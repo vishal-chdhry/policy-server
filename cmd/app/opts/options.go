@@ -154,8 +154,9 @@ func (o Options) restConfig() (*rest.Config, error) {
 	if err != nil {
 		return nil, fmt.Errorf("unable to construct lister client config: %v", err)
 	}
-	// Use protobufs for communication with apiserver
+
 	config.ContentType = "application/vnd.kubernetes.protobuf"
+
 	err = rest.SetKubernetesDefaults(config)
 	if err != nil {
 		return nil, err

@@ -28,9 +28,6 @@ type polrStore struct {
 	store       storage.Storage
 }
 
-const PolicyReportOpenApiV3SchemaKey = "PolicyReport"
-const PolicyReportListOpenApiV3SchemaKey = "PolicyReportList"
-
 func PolicyReportStore(store storage.Storage) API {
 	broadcaster := watch.NewBroadcaster(1000, watch.WaitIfChannelFull)
 
@@ -213,7 +210,7 @@ func (p *polrStore) Delete(ctx context.Context, name string, deleteValidation re
 		}
 		p.broadcaster.Action(watch.Deleted, polr)
 	}
-	return polr, true, nil
+	return &runtime.Unknown{}, true, nil // TODO: Add protobuf in wgpolicygroup
 }
 
 func (p *polrStore) DeleteCollection(ctx context.Context, deleteValidation rest.ValidateObjectFunc, options *metav1.DeleteOptions, listOptions *metainternalversion.ListOptions) (runtime.Object, error) {
@@ -274,6 +271,10 @@ func (p *polrStore) NamespaceScoped() bool {
 
 func (p *polrStore) GetSingularName() string {
 	return "policyreport"
+}
+
+func (p *polrStore) ShortNames() []string {
+	return []string{"polr"}
 }
 
 func (p *polrStore) key(name, namespace string) string {

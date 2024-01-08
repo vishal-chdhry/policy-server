@@ -27,9 +27,6 @@ type cpolrStore struct {
 	store       storage.Storage
 }
 
-const ClusterPolicyReportOpenApiV3SchemaKey = "ClusterPolicyReport"
-const ClusterPolicyReportListOpenApiV3SchemaKey = "ClusterPolicyReportList"
-
 func ClusterPolicyReportStore(store storage.Storage) API {
 	broadcaster := watch.NewBroadcaster(1000, watch.WaitIfChannelFull)
 
@@ -199,7 +196,7 @@ func (c *cpolrStore) Delete(ctx context.Context, name string, deleteValidation r
 		}
 		c.broadcaster.Action(watch.Deleted, cpolr)
 	}
-	return cpolr, true, nil
+	return &runtime.Unknown{}, true, nil
 }
 
 func (c *cpolrStore) DeleteCollection(ctx context.Context, deleteValidation rest.ValidateObjectFunc, options *metav1.DeleteOptions, listOptions *metainternalversion.ListOptions) (runtime.Object, error) {
@@ -259,6 +256,10 @@ func (c *cpolrStore) NamespaceScoped() bool {
 
 func (c *cpolrStore) GetSingularName() string {
 	return "clusterpolicyreport"
+}
+
+func (c *cpolrStore) ShortNames() []string {
+	return []string{"cpolr"}
 }
 
 func (c *cpolrStore) key(name string) string {

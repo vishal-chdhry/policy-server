@@ -10,4 +10,5 @@ type API interface {
 	rest.Scoper
 	rest.SingularNameProvider
 	rest.StandardStorage
+	rest.ShortNamesProvider
 }
