@@ -277,13 +277,13 @@ func (c *cpolrStore) keyForList() string {
 }
 
 func (c *cpolrStore) cpolrToObj(cpolr *v1alpha2.ClusterPolicyReport) (runtime.Object, error) {
-	var unst unstructured.Unstructured
+	unst := unstructured.Unstructured{}
 	var bytes []byte
 	var err error
 	if bytes, err = json.Marshal(cpolr); err != nil {
 		return nil, err
 	}
-	if err = json.Unmarshal(bytes, &unst); err != nil {
+	if err = json.Unmarshal(bytes, &unst.Object); err != nil {
 		return nil, err
 	}
 	return unst.DeepCopyObject(), nil

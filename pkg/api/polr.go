@@ -291,14 +291,14 @@ func (p *polrStore) keyForList(namespace string) string {
 	return fmt.Sprintf("/apis/%s/namespaces/%s/policyreports/", v1alpha2.SchemeGroupVersion, namespace)
 }
 
-func (c *polrStore) polrToObj(cpolr *v1alpha2.PolicyReport) (runtime.Object, error) {
-	var unst unstructured.Unstructured
+func (c *polrStore) polrToObj(polr *v1alpha2.PolicyReport) (runtime.Object, error) {
+	unst := unstructured.Unstructured{}
 	var bytes []byte
 	var err error
-	if bytes, err = json.Marshal(cpolr); err != nil {
+	if bytes, err = json.Marshal(polr); err != nil {
 		return nil, err
 	}
-	if err = json.Unmarshal(bytes, &unst); err != nil {
+	if err = json.Unmarshal(bytes, &unst.Object); err != nil {
 		return nil, err
 	}
 	return unst.DeepCopyObject(), nil
